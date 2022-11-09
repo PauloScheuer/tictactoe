@@ -71,66 +71,42 @@ const resetBody = ()=>{
 }
 
 const checkGameEnd = (board)=>{
-  let nDraw = 0;
-  
-  let fieldX;
-  let fieldY;
-  let fieldZ1;
-  let fieldZ2;
-  let bEndedX = false;
-  let bEndedY = false;
+  let fieldX = PlayerNone;
+  let fieldY = PlayerNone;
+  let fieldZ1 = board[0][0];
+  let fieldZ2 = board[0][boardSize-1];
 
-  let bEndedZ1 = true;
-  fieldZ1 = board[0][0];
+  let nFilledFields = 0;
 
-  let bEndedZ2 = true;
-  fieldZ2 = board[0][boardSize-1];
-  for(let i = 0;i<boardSize;i++){
-    bEndedX = true;
-    bEndedY = true;
+  for (let i = 0;i<boardSize;i++){
+    if (board[i][0] !== PlayerNone) nFilledFields++;
 
     fieldX = board[i][0];
     fieldY = board[0][i];
 
-    if(board[i][0] !== PlayerNone){
-      nDraw++;
-    }
-    
-    for(let j = 1;j<boardSize;j++){
-      if (board[i][j] !== PlayerNone) {
-        nDraw++;
-      }
+    for (let j = 1;j<boardSize;j++){
+      if (board[i][j] !== PlayerNone) nFilledFields++;
 
-      bEndedX = bEndedX && (board[j][i] !== PlayerNone) && (fieldX === board[i][j]);
-      bEndedY = bEndedY && (board[j][i] !== PlayerNone) && (fieldY === board[j][i]);
-      
-      fieldX = board[i][j];
-      fieldY = board[j][i];
+      if (fieldX !== board[i][j]) fieldX = PlayerNone;
+
+      if (fieldY !== board[j][i]) fieldY = PlayerNone;
     }
 
-    if (i>0){
-      bEndedZ1 = bEndedZ1 && (board[i][i] !== PlayerNone) && (fieldZ1 === board[i][i]);
-      bEndedZ2 = bEndedZ2 && (board[i][boardSize-i-1] !== PlayerNone) && (fieldZ2 === board[i][boardSize-i-1]);
-    }
-    
-    if(bEndedX || bEndedY){
-      break;
+    if((fieldX !== PlayerNone) || (fieldY !== PlayerNone)) break;
+
+    if(i > 0){
+      if (fieldZ1 !== board[i][i]) fieldZ1 = PlayerNone;
+      if (fieldZ2 !== board[i][boardSize-i-1]) fieldZ2 = PlayerNone;
     }
   }
-  let howEnded = Continue;
-  if (bEndedX){
-    howEnded = fieldX;
-  }else if(bEndedY){
-    howEnded = fieldY;
-  }else if(bEndedZ1){
-    howEnded = fieldZ1;
-  }else if(bEndedZ2){
-    howEnded = fieldZ2;
-  }else if(nDraw === boardSize*boardSize){
-    howEnded = Draw;
-  }
+
+  if(fieldX !== PlayerNone) return fieldX;
+  if(fieldY !== PlayerNone) return fieldY;
+  if(fieldZ1 !== PlayerNone) return fieldZ1;
+  if(fieldZ2 !== PlayerNone) return fieldZ2;
+  if(nFilledFields === boardSize*boardSize) return Draw;
   
-  return howEnded;
+  return Continue;
 }
 
 const pause = async(time)=>{
