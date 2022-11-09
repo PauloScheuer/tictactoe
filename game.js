@@ -117,8 +117,8 @@ const setPlayer = ()=>{
   currentPlayer = currentPlayer === Player1 ? Player2 : Player1;
 }
 
-const oponent = ()=>{
-  return currentPlayer === Player1 ? Player2 : Player1;
+const oponent = (player)=>{
+  return player === Player1 ? Player2 : Player1;
 }
 
 const handleFieldClicked = (i,j)=>{
@@ -144,18 +144,15 @@ const agentPlay = ()=>{
 }
 
 const getBestAction = (board)=>{
-  const [v,i,j] = max(board);
-  // const i = Math.floor(Math.random()*boardSize);
-  // const j = Math.floor(Math.random()*boardSize);
-
-
+  const [v,i,j] = max(board,currentPlayer);
+  console.log(names[currentPlayer] +':'+v)
   return [i,j];
 }
 
-const max = (board_current)=>{
+const max = (board_current,player)=>{
   let howEnded = checkGameEnd(board_current);
   
-  if (howEnded === currentPlayer){
+  if (howEnded === player){
     return [1,-1,-1];
   }else if(howEnded === Draw){
     return [0,-1,-1];
@@ -168,9 +165,9 @@ const max = (board_current)=>{
   let i = -1;
   let j = -1;
 
-  const successors = getStateSuccessors(board_current);
+  const successors = getStateSuccessors(board_current,player);
   successors.forEach(successor=>{
-    minValue = min(successor.board)[0];
+    minValue = min(successor.board,player)[0];
     if(minValue > v){
       v = minValue;
       [i,j] = successor.indexes;
@@ -180,9 +177,10 @@ const max = (board_current)=>{
   return [v,i,j];
 }
 
-const min = (board_current)=>{
+const min = (board_current,player)=>{
   let howEnded = checkGameEnd(board_current);
-  if (howEnded === oponent()){
+
+  if (howEnded === oponent(player)){
     return [-1,-1,-1];
   }else if(howEnded === Draw){
     return [0,-1,-1];
@@ -195,9 +193,9 @@ const min = (board_current)=>{
   let i = -1;
   let j = -1;
 
-  const successors = getStateSuccessors(board_current);
+  const successors = getStateSuccessors(board_current,oponent(player));
   successors.forEach(successor=>{
-    maxValue = max(successor.board)[0];
+    maxValue = max(successor.board,player)[0];
     if(maxValue < v){
       v = maxValue;
       [i,j] = successor.indexes;
@@ -207,14 +205,14 @@ const min = (board_current)=>{
   return [v,i,j];
 }
 
-const getStateSuccessors = (board_parent)=>{
+const getStateSuccessors = (board_parent,player)=>{
   const successors = [];
   let newBoard;
   board_parent.forEach((row,i)=>{
     row.forEach((item,j)=>{
       if (item === PlayerNone){
         newBoard = board_parent.map(i=>i.map(j=>j));
-        newBoard[i][j] = currentPlayer;
+        newBoard[i][j] = player;
         successors.push({board:newBoard,indexes:[i,j]});
       } 
     })
