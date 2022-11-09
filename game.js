@@ -154,12 +154,14 @@ const agentPlay = async()=>{
 }
 
 const getBestAction = (board)=>{
-  const [v,i,j] = max(board,currentPlayer);
+  let alpha = Number.NEGATIVE_INFINITY;
+  let beta = Number.POSITIVE_INFINITY;
+  const [v,i,j] = max(board,currentPlayer,alpha,beta);
   console.log(names[currentPlayer] +':'+v)
   return [i,j];
 }
 
-const max = (board_current,player)=>{
+const max = (board_current,player,alpha,beta)=>{
   let howEnded = checkGameEnd(board_current);
   
   if (howEnded === player){
@@ -176,18 +178,21 @@ const max = (board_current,player)=>{
   let j = -1;
 
   const successors = getStateSuccessors(board_current,player);
-  successors.forEach(successor=>{
-    minValue = min(successor.board,player)[0];
+  successors.every(successor=>{
+    minValue = min(successor.board,player,alpha,beta)[0];
     if(minValue > v){
       v = minValue;
       [i,j] = successor.indexes;
+
+      alpha = Math.max(alpha,v);
     }
+    return alpha < beta;
   });
 
   return [v,i,j];
 }
 
-const min = (board_current,player)=>{
+const min = (board_current,player,alpha,beta)=>{
   let howEnded = checkGameEnd(board_current);
 
   if (howEnded === oponent(player)){
@@ -204,12 +209,16 @@ const min = (board_current,player)=>{
   let j = -1;
 
   const successors = getStateSuccessors(board_current,oponent(player));
-  successors.forEach(successor=>{
-    maxValue = max(successor.board,player)[0];
+  successors.every(successor=>{
+    maxValue = max(successor.board,player,alpha,beta)[0];
     if(maxValue < v){
       v = maxValue;
       [i,j] = successor.indexes;
+
+      beta = Math.min(beta,v);
     }
+
+    return beta > alpha;
   });
 
   return [v,i,j];
