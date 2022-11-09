@@ -5,10 +5,13 @@ const Player2=1;
 
 const boardSize = 3;
 
-const Win1 = 0;
-const Win2 = 1;
+const Win1 = Player1;
+const Win2 = Player2;
 const Draw = 2;
 const Continue = 3;
+
+const Human = 0;
+const Agent = 1;
 
 const names = ['Player 1', 'Player 2'];
 const visuals = ['x','o'];
@@ -17,28 +20,12 @@ const visuals = ['x','o'];
 const board = Array.from({length:boardSize},_=>Array.from({length:boardSize},_=>-1));
 let currentPlayer = Player1;
 let humanCanPlay = true;
+let player1 = Human;
+let player2 = Agent;
 
 window.addEventListener('load',async()=>{
   resetBody();
-
-  let howEnded = Continue;
-  while (howEnded === Continue){
-    if (currentPlayer === Player1){
-      humanPlay();
-    }else{
-      agentPlay();
-    }
-    await pause(1000);
-    howEnded = checkGameEnd(board);
-  }
-  humanCanPlay = false;
-  if (howEnded === Win1){
-    console.log(`${names[Player1]} won!`);
-  } else if(howEnded === Win2){
-    console.log(`${names[Player2]} won`)
-  } else{
-    console.log("It's a draw!");
-  }
+  player1Play();
 });
 
 const fieldClicked = (i,j)=>{
@@ -109,6 +96,17 @@ const checkGameEnd = (board)=>{
   return Continue;
 }
 
+const endGame = (howEnded)=>{
+  humanCanPlay = false;
+  if (howEnded === Win1){
+    console.log(`${names[Player1]} won!`);
+  } else if(howEnded === Win2){
+    console.log(`${names[Player2]} won!`)
+  } else{
+    console.log("It's a draw!");
+  }
+}
+
 const pause = async(time)=>{
   await new Promise((resolve) => setTimeout(resolve, time));
 }
@@ -122,25 +120,37 @@ const oponent = (player)=>{
 }
 
 const handleFieldClicked = (i,j)=>{
-  if (humanCanPlay){
-    fieldClicked(i,j);
+  if (humanCanPlay && fieldClicked(i,j)){
+    humanCanPlay = false;
   }
 }
 
-const humanPlay = ()=>{
-  humanCanPlay = true;
+const player1Play = async()=>{
+  player1 === Human ? await humanPlay() : await agentPlay();
+
+  let howEnded = checkGameEnd(board);
+  howEnded === Continue ? player2Play() : endGame(howEnded);
 }
 
-const agentPlay = ()=>{
-  humanCanPlay = false;
+const player2Play = async()=>{
+  player2 === Human ? await humanPlay() : await agentPlay();
+
+  let howEnded = checkGameEnd(board);
+  howEnded === Continue ? player1Play() : endGame(howEnded);
+}
+
+const humanPlay = async()=>{
+  humanCanPlay = true;
+  while (humanCanPlay) await pause(50);
+}
+
+
+const agentPlay = async()=>{
+  await pause(1000);
+
   let i,j;
   [i,j] = getBestAction(board);
-
-  let bTryAgain = !fieldClicked(i,j);
-  while (bTryAgain){
-    [i,j] = getBestAction();
-    bTryAgain = !fieldClicked(i,j);
-  }
+  fieldClicked(i,j);
 }
 
 const getBestAction = (board)=>{
