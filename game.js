@@ -1,27 +1,30 @@
 //constants
-const PlayerNone = -1;
-const Player1=0;
-const Player2=1;
+
+//Player Type
+const ptPlayerNone = -1;
+const ptPlayer1=0;
+const ptPlayer2=1;
+
+//End type
+const etWin1 = ptPlayer1;
+const etWin2 = ptPlayer2;
+const etDraw = 2;
+const etContinue = 3;
+
+//Agent type
+const atHuman = 0;
+const atAI = 1;
 
 const boardSize = 3;
-
-const Win1 = Player1;
-const Win2 = Player2;
-const Draw = 2;
-const Continue = 3;
-
-const Human = 0;
-const Agent = 1;
-
 const names = ['Player 1', 'Player 2'];
 const visuals = ['x','o'];
 
 // game variables
 const board = Array.from({length:boardSize},_=>Array.from({length:boardSize},_=>-1));
-let currentPlayer = Player1;
+let currentPlayer = ptPlayer1;
 let humanCanPlay = true;
-let player1 = Human;
-let player2 = Agent;
+let player1 = atHuman;
+let player2 = atAI;
 
 window.addEventListener('load',async()=>{
   resetBody();
@@ -29,7 +32,7 @@ window.addEventListener('load',async()=>{
 });
 
 const fieldClicked = (i,j)=>{
-  if(board[i][j]===PlayerNone){
+  if(board[i][j]===ptPlayerNone){
     board[i][j] = currentPlayer;
     const field = document.getElementById(`${i}_${j}`);
     field.innerHTML = visuals[currentPlayer];
@@ -58,50 +61,50 @@ const resetBody = ()=>{
 }
 
 const checkGameEnd = (board)=>{
-  let fieldX = PlayerNone;
-  let fieldY = PlayerNone;
+  let fieldX = ptPlayerNone;
+  let fieldY = ptPlayerNone;
   let fieldZ1 = board[0][0];
   let fieldZ2 = board[0][boardSize-1];
 
   let nFilledFields = 0;
 
   for (let i = 0;i<boardSize;i++){
-    if (board[i][0] !== PlayerNone) nFilledFields++;
+    if (board[i][0] !== ptPlayerNone) nFilledFields++;
 
     fieldX = board[i][0];
     fieldY = board[0][i];
 
     for (let j = 1;j<boardSize;j++){
-      if (board[i][j] !== PlayerNone) nFilledFields++;
+      if (board[i][j] !== ptPlayerNone) nFilledFields++;
 
-      if (fieldX !== board[i][j]) fieldX = PlayerNone;
+      if (fieldX !== board[i][j]) fieldX = ptPlayerNone;
 
-      if (fieldY !== board[j][i]) fieldY = PlayerNone;
+      if (fieldY !== board[j][i]) fieldY = ptPlayerNone;
     }
 
-    if((fieldX !== PlayerNone) || (fieldY !== PlayerNone)) break;
+    if((fieldX !== ptPlayerNone) || (fieldY !== ptPlayerNone)) break;
 
     if(i > 0){
-      if (fieldZ1 !== board[i][i]) fieldZ1 = PlayerNone;
-      if (fieldZ2 !== board[i][boardSize-i-1]) fieldZ2 = PlayerNone;
+      if (fieldZ1 !== board[i][i]) fieldZ1 = ptPlayerNone;
+      if (fieldZ2 !== board[i][boardSize-i-1]) fieldZ2 = ptPlayerNone;
     }
   }
 
-  if(fieldX !== PlayerNone) return fieldX;
-  if(fieldY !== PlayerNone) return fieldY;
-  if(fieldZ1 !== PlayerNone) return fieldZ1;
-  if(fieldZ2 !== PlayerNone) return fieldZ2;
-  if(nFilledFields === boardSize*boardSize) return Draw;
+  if(fieldX !== ptPlayerNone) return fieldX;
+  if(fieldY !== ptPlayerNone) return fieldY;
+  if(fieldZ1 !== ptPlayerNone) return fieldZ1;
+  if(fieldZ2 !== ptPlayerNone) return fieldZ2;
+  if(nFilledFields === boardSize*boardSize) return etDraw;
   
-  return Continue;
+  return etContinue;
 }
 
 const endGame = (howEnded)=>{
   humanCanPlay = false;
-  if (howEnded === Win1){
-    console.log(`${names[Player1]} won!`);
-  } else if(howEnded === Win2){
-    console.log(`${names[Player2]} won!`)
+  if (howEnded === etWin1){
+    console.log(`${names[ptPlayer1]} won!`);
+  } else if(howEnded === etWin2){
+    console.log(`${names[ptPlayer2]} won!`)
   } else{
     console.log("It's a draw!");
   }
@@ -112,11 +115,11 @@ const pause = async(time)=>{
 }
 
 const setPlayer = ()=>{
-  currentPlayer = currentPlayer === Player1 ? Player2 : Player1;
+  currentPlayer = currentPlayer === ptPlayer1 ? ptPlayer2 : ptPlayer1;
 }
 
 const oponent = (player)=>{
-  return player === Player1 ? Player2 : Player1;
+  return player === ptPlayer1 ? ptPlayer2 : ptPlayer1;
 }
 
 const handleFieldClicked = (i,j)=>{
@@ -126,17 +129,17 @@ const handleFieldClicked = (i,j)=>{
 }
 
 const player1Play = async()=>{
-  player1 === Human ? await humanPlay() : await agentPlay();
+  player1 === atHuman ? await humanPlay() : await agentPlay();
 
   let howEnded = checkGameEnd(board);
-  howEnded === Continue ? player2Play() : endGame(howEnded);
+  howEnded === etContinue ? player2Play() : endGame(howEnded);
 }
 
 const player2Play = async()=>{
-  player2 === Human ? await humanPlay() : await agentPlay();
+  player2 === atHuman ? await humanPlay() : await agentPlay();
 
   let howEnded = checkGameEnd(board);
-  howEnded === Continue ? player1Play() : endGame(howEnded);
+  howEnded === etContinue ? player1Play() : endGame(howEnded);
 }
 
 const humanPlay = async()=>{
@@ -166,9 +169,9 @@ const max = (board_current,player,alpha,beta)=>{
   
   if (howEnded === player){
     return [1,-1,-1];
-  }else if(howEnded === Draw){
+  }else if(howEnded === etDraw){
     return [0,-1,-1];
-  }else if(howEnded !== Continue){
+  }else if(howEnded !== etContinue){
     return [-1,-1,-1];
   }
 
@@ -197,9 +200,9 @@ const min = (board_current,player,alpha,beta)=>{
 
   if (howEnded === oponent(player)){
     return [-1,-1,-1];
-  }else if(howEnded === Draw){
+  }else if(howEnded === etDraw){
     return [0,-1,-1];
-  }else if(howEnded !== Continue){
+  }else if(howEnded !== etContinue){
     return [1,-1,-1];
   }
 
@@ -229,7 +232,7 @@ const getStateSuccessors = (board_parent,player)=>{
   let newBoard;
   board_parent.forEach((row,i)=>{
     row.forEach((item,j)=>{
-      if (item === PlayerNone){
+      if (item === ptPlayerNone){
         newBoard = board_parent.map(i=>i.map(j=>j));
         newBoard[i][j] = player;
         successors.push({board:newBoard,indexes:[i,j]});
