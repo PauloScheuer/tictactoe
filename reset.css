@@ -46,3 +46,24 @@ table {
 	border-collapse: collapse;
 	border-spacing: 0;
 }
+button {
+	margin: 0;
+	padding: 0;
+	border: none;
+	font: inherit;
+	color: inherit;
+	background: none;
+  }
+
+  /* Firefox fix - https://bugzilla.mozilla.org/show_bug.cgi?id=140562 */
+  button::-moz-focus-inner {
+	padding: 0;
+	border: none;
+  }
+  /* We're using :-moz-focusring rather than :focus so that we
+	 don't change the default focus in other browsers. If you
+	 set your own focus styles for buttons, you might drop the
+	 :-moz-focusring part. */
+  button:-moz-focusring {
+	outline: 1px dotted;
+  }

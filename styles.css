@@ -1,23 +1,66 @@
 body{
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: black;
+  background-color: #87cefa;
+  font-family: cursive;
 }
 
 #board{
   display: grid;
   grid-template-columns: auto auto auto;
-  gap: 50px;
+  gap: 16px;
 }
 
 .field{
   background-color: white;
-  width: 50px;
-  height: 50px;
+  width: 80px;
+  height: 80px;
   cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
+  border-radius: 8px;
+  font-size: 48px;
+  color:#0C9CF4;
+}
+
+.title{
+  color:white;
+  font-size: 96px;
+  margin-bottom: 100px;
+  font-family: 'Rubik Vinyl', cursive;
+}
+
+.invisible{
+  display: none !important;
+}
+
+#config{
+  display: flex;
+  flex-direction: column;
+}
+
+.select{
+  color:white;
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.option{
+  margin-top: 12px;
+  background-color: white;
+  border-radius: 8px;
+  font-family: cursive;
+  color:#0C9CF4;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  cursor: pointer;
+  transition: 500ms;
+}
+.option:hover{
+  background-color: #0C9CF4;
+  color: white;
 }

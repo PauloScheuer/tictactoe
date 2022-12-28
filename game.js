@@ -1,4 +1,10 @@
 //constants
+//Game type
+const gtEasy = 0;
+const gtMedium = 1;
+const gtHard = 2;
+const gtImpossible = 3;
+const gtTwoPlayers = 4;
 
 //Player Type
 const ptPlayerNone = -1;
@@ -17,7 +23,7 @@ const atAI = 1;
 
 const boardSize = 3;
 const names = ['Player 1', 'Player 2'];
-const visuals = ['x','o'];
+const visuals = ['X','O'];
 
 // game variables
 const board = Array.from({length:boardSize},_=>Array.from({length:boardSize},_=>-1));
@@ -25,11 +31,55 @@ let currentPlayer = ptPlayer1;
 let humanCanPlay = true;
 let player1 = atHuman;
 let player2 = atAI;
+let difficulty = 0;
+
+// html elements
+const configHTML = document.getElementById('config');
+const boardHTML = document.getElementById('board');
+const easyHTML = document.getElementById('easy');
+const mediumHTML = document.getElementById('medium');
+const hardHTML = document.getElementById('hard');
+const impossibleHTML = document.getElementById('impossible');
+const twoPlayersHTML = document.getElementById('twoplayers');
 
 window.addEventListener('load',async()=>{
+  boardHTML.classList.add('invisible');
+
+  easyHTML.onclick       = ()=>startGame(gtEasy);
+  mediumHTML.onclick     = ()=>startGame(gtMedium);
+  hardHTML.onclick       = ()=>startGame(gtHard);
+  impossibleHTML.onclick = ()=>startGame(gtImpossible);
+  twoPlayersHTML.onclick = ()=>startGame(gtTwoPlayers);
+});
+
+const startGame = (gtMode)=>{
+  player1 = atHuman;
+  if(gtMode === gtTwoPlayers){
+    player2 = atHuman;
+    difficulty = 0;
+  }else{
+    player2 = atAI;
+    switch(gtMode){
+      case gtEasy:
+        difficulty = 20;
+        break;
+      case gtMedium:
+        difficulty = 40;
+        break;
+      case gtHard:
+        difficulty = 60;
+        break;
+      default:
+        difficulty = 100;
+    }
+  }
+
+  configHTML.classList.add('invisible');
+  boardHTML.classList.remove('invisible');
+
   resetBody();
   player1Play();
-});
+}
 
 const fieldClicked = (i,j)=>{
   if(board[i][j]===ptPlayerNone){
@@ -46,7 +96,6 @@ const fieldClicked = (i,j)=>{
 }
 
 const resetBody = ()=>{
-  const boardHTML = document.getElementById('board');
   boardHTML.innerHTML = '';
   let field;
   board.forEach((row,i)=>{
@@ -147,13 +196,32 @@ const humanPlay = async()=>{
   while (humanCanPlay) await pause(50);
 }
 
-
 const agentPlay = async()=>{
   await pause(1000);
 
+
   let i,j;
-  [i,j] = getBestAction(board);
+
+  let lucky = Math.random();
+  if(lucky < difficulty/100){
+    [i,j] = getBestAction(board);
+  }else{
+    [i,j] = getRandomAction(board);
+  }
+
   fieldClicked(i,j);
+}
+
+const getRandomAction = (board)=>{
+  let i = -1;
+  let j = -1;
+  let bInvalid = true;
+  while(bInvalid){
+    i = Math.floor(Math.random()*boardSize);
+    j = Math.floor(Math.random()*boardSize);
+    bInvalid = board[i][j] !== ptPlayerNone;
+  }
+  return [i,j];
 }
 
 const getBestAction = (board)=>{

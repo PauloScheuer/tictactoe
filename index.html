@@ -5,19 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="reset.css" rel="stylesheet">
   <link href="styles.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Rubik+Vinyl&display=swap" rel="stylesheet">
   <title>Tic Tac Toe</title>
 </head>
 <body>
+  <h1 class="title">Tic Tac Toe</h1>
+  <div id="config">
+    <h2 class="select">Select a game mode:</h2>
+    <button class="option" id="easy">Easy</button>
+    <button class="option" id="medium">Medium</button>
+    <button class="option" id="hard">Hard</button>
+    <button class="option" id="impossible">Impossible</button>
+    <button class="option" id="twoplayers">2 Players</button>
+  </div>
   <div id="board">
-    <!-- <div id="0_0" class="field" onclick="fieldClicked(0,0)"></div>
-    <div id="0_1" class="field" onclick="fieldClicked(0,1)"></div>
-    <div id="0_2" class="field" onclick="fieldClicked(0,2)"></div>
-    <div id="1_0" class="field" onclick="fieldClicked(1,0)"></div>
-    <div id="1_1" class="field" onclick="fieldClicked(1,1)"></div>
-    <div id="1_2" class="field" onclick="fieldClicked(1,2)"></div>
-    <div id="2_0" class="field" onclick="fieldClicked(2,0)"></div>
-    <div id="2_1" class="field" onclick="fieldClicked(2,1)"></div>
-    <div id="2_2" class="field" onclick="fieldClicked(2,2)"></div> -->
   </div>
   <script src="game.js" type="module"></script>
 </body>
