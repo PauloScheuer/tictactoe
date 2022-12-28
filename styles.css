@@ -64,3 +64,13 @@ body{
   background-color: #0C9CF4;
   color: white;
 }
+
+#result{
+  background-color: #0C9CF4;
+  margin-bottom: 62px;
+  border-radius: 8px;
+  padding: 20px 40px;
+  font-size: 20px;
+  background-color:white;
+  color: #0C9CF4;
+}

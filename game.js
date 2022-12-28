@@ -34,16 +34,18 @@ let player2 = atAI;
 let difficulty = 0;
 
 // html elements
-const configHTML = document.getElementById('config');
-const boardHTML = document.getElementById('board');
-const easyHTML = document.getElementById('easy');
-const mediumHTML = document.getElementById('medium');
-const hardHTML = document.getElementById('hard');
+const configHTML     = document.getElementById('config');
+const resultHTML     = document.getElementById('result');
+const boardHTML      = document.getElementById('board');
+const easyHTML       = document.getElementById('easy');
+const mediumHTML     = document.getElementById('medium');
+const hardHTML       = document.getElementById('hard');
 const impossibleHTML = document.getElementById('impossible');
 const twoPlayersHTML = document.getElementById('twoplayers');
 
 window.addEventListener('load',async()=>{
   boardHTML.classList.add('invisible');
+  resultHTML.classList.add('invisible');
 
   easyHTML.onclick       = ()=>startGame(gtEasy);
   mediumHTML.onclick     = ()=>startGame(gtMedium);
@@ -90,7 +92,6 @@ const fieldClicked = (i,j)=>{
     setPlayer();
     return true;
   }else{
-    console.log('invalid')
     return false;
   }
 }
@@ -149,13 +150,15 @@ const checkGameEnd = (board)=>{
 }
 
 const endGame = (howEnded)=>{
+  resultHTML.classList.remove('invisible');
+
   humanCanPlay = false;
   if (howEnded === etWin1){
-    console.log(`${names[ptPlayer1]} won!`);
+    resultHTML.innerHTML = `${names[ptPlayer1]} won!`;
   } else if(howEnded === etWin2){
-    console.log(`${names[ptPlayer2]} won!`)
+    resultHTML.innerHTML = `${names[ptPlayer2]} won!`;
   } else{
-    console.log("It's a draw!");
+    resultHTML.innerHTML = "It's a draw!";
   }
 }
 
@@ -198,8 +201,6 @@ const humanPlay = async()=>{
 
 const agentPlay = async()=>{
   await pause(1000);
-
-
   let i,j;
 
   let lucky = Math.random();
@@ -228,7 +229,6 @@ const getBestAction = (board)=>{
   let alpha = Number.NEGATIVE_INFINITY;
   let beta = Number.POSITIVE_INFINITY;
   const [v,i,j] = max(board,currentPlayer,alpha,beta);
-  console.log(names[currentPlayer] +':'+v)
   return [i,j];
 }
 
