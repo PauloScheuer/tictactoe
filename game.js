@@ -29,6 +29,8 @@ const visuals = ['X','O'];
 const board = Array.from({length:boardSize},_=>Array.from({length:boardSize},_=>-1));
 let currentPlayer = ptPlayer1;
 let humanCanPlay = true;
+let controlEndGame = false;
+let controlHowEnded = etContinue;
 let player1 = atHuman;
 let player2 = atAI;
 let difficulty = 0;
@@ -36,6 +38,8 @@ let difficulty = 0;
 // html elements
 const configHTML     = document.getElementById('config');
 const resultHTML     = document.getElementById('result');
+const stateHTML      = document.getElementById('state');
+const restartHTML    = document.getElementById('restart');
 const boardHTML      = document.getElementById('board');
 const easyHTML       = document.getElementById('easy');
 const mediumHTML     = document.getElementById('medium');
@@ -47,11 +51,13 @@ window.addEventListener('load',async()=>{
   boardHTML.classList.add('invisible');
   resultHTML.classList.add('invisible');
 
-  easyHTML.onclick       = ()=>startGame(gtEasy);
-  mediumHTML.onclick     = ()=>startGame(gtMedium);
-  hardHTML.onclick       = ()=>startGame(gtHard);
-  impossibleHTML.onclick = ()=>startGame(gtImpossible);
-  twoPlayersHTML.onclick = ()=>startGame(gtTwoPlayers);
+  restartHTML.onclick     = ()=>handleRestart();
+
+  easyHTML.onclick        = ()=>startGame(gtEasy);
+  mediumHTML.onclick      = ()=>startGame(gtMedium);
+  hardHTML.onclick        = ()=>startGame(gtHard);
+  impossibleHTML.onclick  = ()=>startGame(gtImpossible);
+  twoPlayersHTML.onclick  = ()=>startGame(gtTwoPlayers);
 });
 
 const startGame = (gtMode)=>{
@@ -78,6 +84,7 @@ const startGame = (gtMode)=>{
 
   configHTML.classList.add('invisible');
   boardHTML.classList.remove('invisible');
+  resultHTML.classList.remove('invisible');
 
   resetBody();
   player1Play();
@@ -87,7 +94,7 @@ const fieldClicked = (i,j)=>{
   if(board[i][j]===ptPlayerNone){
     board[i][j] = currentPlayer;
     const field = document.getElementById(`${i}_${j}`);
-    field.innerHTML = visuals[currentPlayer];
+    field.innerText = visuals[currentPlayer];
 
     setPlayer();
     return true;
@@ -97,17 +104,30 @@ const fieldClicked = (i,j)=>{
 }
 
 const resetBody = ()=>{
-  boardHTML.innerHTML = '';
+  boardHTML.innerText = '';
   let field;
   board.forEach((row,i)=>{
-    row.forEach((_,j)=>{
+    row.forEach((item,j)=>{
+      board[i][j] = -1;
       field = document.createElement('div');
       field.className = "field";
       field.id = `${i}_${j}`;
       field.onclick = ()=>handleFieldClicked(i,j);
       boardHTML.appendChild(field);
     })
-  })
+  });
+}
+
+const handleRestart = ()=>{
+  currentPlayer = ptPlayer1;
+
+  //if the game is currently being played, need to stop the turn recursion
+  if(controlHowEnded == etContinue){
+    controlEndGame = true;
+  }
+
+  resetBody();
+  player1Play();
 }
 
 const checkGameEnd = (board)=>{
@@ -150,16 +170,18 @@ const checkGameEnd = (board)=>{
 }
 
 const endGame = (howEnded)=>{
-  resultHTML.classList.remove('invisible');
-
   humanCanPlay = false;
-  if (howEnded === etWin1){
-    resultHTML.innerHTML = `${names[ptPlayer1]} won!`;
-  } else if(howEnded === etWin2){
-    resultHTML.innerHTML = `${names[ptPlayer2]} won!`;
-  } else{
-    resultHTML.innerHTML = "It's a draw!";
+  if(!controlEndGame){
+    if (howEnded === etWin1){
+      stateHTML.innerText = `${names[ptPlayer1]} won!`;
+    } else if(howEnded === etWin2){
+      stateHTML.innerText = `${names[ptPlayer2]} won!`;
+    } else{
+      stateHTML.innerText = "It's a draw!";
+    }
   }
+  controlHowEnded = howEnded;
+  controlEndGame = false;
 }
 
 const pause = async(time)=>{
@@ -181,17 +203,20 @@ const handleFieldClicked = (i,j)=>{
 }
 
 const player1Play = async()=>{
+  stateHTML.innerText = `${names[ptPlayer1]}'s turn:`;
+
   player1 === atHuman ? await humanPlay() : await agentPlay();
 
   let howEnded = checkGameEnd(board);
-  howEnded === etContinue ? player2Play() : endGame(howEnded);
+  ((howEnded === etContinue) && (!controlEndGame)) ? player2Play() : endGame(howEnded);
 }
 
 const player2Play = async()=>{
+  stateHTML.innerText = `${names[ptPlayer2]}'s turn:`;
   player2 === atHuman ? await humanPlay() : await agentPlay();
 
   let howEnded = checkGameEnd(board);
-  howEnded === etContinue ? player1Play() : endGame(howEnded);
+  ((howEnded === etContinue) && (!controlEndGame)) ? player1Play() : endGame(howEnded);
 }
 
 const humanPlay = async()=>{

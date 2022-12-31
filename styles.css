@@ -30,7 +30,7 @@ body{
 .title{
   color:white;
   font-size: 96px;
-  margin-bottom: 100px;
+  margin-bottom: 64px;
   font-family: 'Rubik Vinyl', cursive;
 }
 
@@ -66,11 +66,32 @@ body{
 }
 
 #result{
-  background-color: #0C9CF4;
-  margin-bottom: 62px;
+  margin-bottom: 64px;
   border-radius: 8px;
-  padding: 20px 40px;
+  padding: 20px 20px;
   font-size: 20px;
   background-color:white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#restart{
+  border: 3px #0C9CF4 solid;
+  padding: 8px;
+  border-radius: 50%;
+  font-size: 16px;
+  transition: 500ms;
+  cursor: pointer;
+  margin-right: 16px;
+}
+#restart:hover{
+  background-color: #0C9CF4;
+}
+#restart:hover > #restartImg{
+  stroke: white;
+}
+
+#state{
   color: #0C9CF4;
 }
