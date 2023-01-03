@@ -16,6 +16,7 @@ const etWin1 = ptPlayer1;
 const etWin2 = ptPlayer2;
 const etDraw = 2;
 const etContinue = 3;
+const etRestart = 4;
 
 //Agent type
 const atHuman = 0;
@@ -27,13 +28,14 @@ const visuals = ['X','O'];
 
 // game variables
 const board = Array.from({length:boardSize},_=>Array.from({length:boardSize},_=>-1));
-let currentPlayer = ptPlayer1;
-let humanCanPlay = true;
-let controlEndGame = false;
-let controlHowEnded = etContinue;
-let player1 = atHuman;
-let player2 = atAI;
-let difficulty = 0;
+let ptCurrentPlayer = ptPlayer1;
+let bHumanCanPlay = true;
+let bControlEndGame = false;
+let etControlHowEnded = etContinue;
+let atPlayer1 = atHuman;
+let atPlayer2 = atAI;
+let nDifficulty = 0;
+let acController = null;
 
 // html elements
 const configHTML     = document.getElementById('config');
@@ -61,24 +63,26 @@ window.addEventListener('load',async()=>{
 });
 
 const startGame = (gtMode)=>{
-  player1 = atHuman;
+  ptCurrentPlayer = ptPlayer1;
+
+  atPlayer1 = atHuman;
   if(gtMode === gtTwoPlayers){
-    player2 = atHuman;
-    difficulty = 0;
+    atPlayer2 = atHuman;
+    nDifficulty = 0;
   }else{
-    player2 = atAI;
+    atPlayer2 = atAI;
     switch(gtMode){
       case gtEasy:
-        difficulty = 20;
+        nDifficulty = 20;
         break;
       case gtMedium:
-        difficulty = 40;
+        nDifficulty = 40;
         break;
       case gtHard:
-        difficulty = 60;
+        nDifficulty = 60;
         break;
       default:
-        difficulty = 100;
+        nDifficulty = 100;
     }
   }
 
@@ -87,14 +91,14 @@ const startGame = (gtMode)=>{
   resultHTML.classList.remove('invisible');
 
   resetBody();
-  player1Play();
+  playerNPlay();
 }
 
 const fieldClicked = (i,j)=>{
   if(board[i][j]===ptPlayerNone){
-    board[i][j] = currentPlayer;
+    board[i][j] = ptCurrentPlayer;
     const field = document.getElementById(`${i}_${j}`);
-    field.innerText = visuals[currentPlayer];
+    field.innerText = visuals[ptCurrentPlayer];
 
     setPlayer();
     return true;
@@ -119,15 +123,15 @@ const resetBody = ()=>{
 }
 
 const handleRestart = ()=>{
-  currentPlayer = ptPlayer1;
+  ptCurrentPlayer = ptPlayer1;
 
   //if the game is currently being played, need to stop the turn recursion
-  if(controlHowEnded == etContinue){
-    controlEndGame = true;
+  if(etControlHowEnded == etContinue){
+    bControlEndGame = true;
   }
 
   resetBody();
-  player1Play();
+  playerNPlay();
 }
 
 const checkGameEnd = (board)=>{
@@ -170,8 +174,12 @@ const checkGameEnd = (board)=>{
 }
 
 const endGame = (howEnded)=>{
-  humanCanPlay = false;
-  if(!controlEndGame){
+  bHumanCanPlay = false;
+  if(acController != null){
+    acController.abort();
+  }
+
+  if(!bControlEndGame){
     if (howEnded === etWin1){
       stateHTML.innerText = `${names[ptPlayer1]} won!`;
     } else if(howEnded === etWin2){
@@ -180,16 +188,38 @@ const endGame = (howEnded)=>{
       stateHTML.innerText = "It's a draw!";
     }
   }
-  controlHowEnded = howEnded;
-  controlEndGame = false;
+  etControlHowEnded = howEnded;
+  bControlEndGame = false;
 }
 
 const pause = async(time)=>{
-  await new Promise((resolve) => setTimeout(resolve, time));
+  acController = new AbortController();
+  try {
+    await new Promise((resolve, reject) => {
+      let tTimer;
+
+      const handleAbort = ()=>{
+        clearTimeout(tTimer);
+        reject();
+      }
+
+      tTimer = setTimeout(()=>{
+        resolve();
+        acController.signal.removeEventListener('abort',handleAbort);
+      }, time);
+
+      acController.signal.addEventListener('abort',handleAbort);
+
+    });
+  } catch (error) {
+    //do nothing
+  }
+  acController = null;
 }
 
+
 const setPlayer = ()=>{
-  currentPlayer = currentPlayer === ptPlayer1 ? ptPlayer2 : ptPlayer1;
+  ptCurrentPlayer = ptCurrentPlayer === ptPlayer1 ? ptPlayer2 : ptPlayer1;
 }
 
 const oponent = (player)=>{
@@ -197,45 +227,51 @@ const oponent = (player)=>{
 }
 
 const handleFieldClicked = (i,j)=>{
-  if (humanCanPlay && fieldClicked(i,j)){
-    humanCanPlay = false;
+  if (bHumanCanPlay && fieldClicked(i,j)){
+    bHumanCanPlay = false;
   }
 }
 
-const player1Play = async()=>{
-  stateHTML.innerText = `${names[ptPlayer1]}'s turn:`;
+const playerNPlay = async()=>{
+  stateHTML.innerText = `${names[ptCurrentPlayer]}'s turn:`;
+  if(!bControlEndGame){
+    let atPlayer = ptCurrentPlayer === ptPlayer1 ? atPlayer1 : atPlayer2;
 
-  player1 === atHuman ? await humanPlay() : await agentPlay();
+    atPlayer === atHuman ? await humanPlay() : await agentPlay();
 
-  let howEnded = checkGameEnd(board);
-  ((howEnded === etContinue) && (!controlEndGame)) ? player2Play() : endGame(howEnded);
-}
+    let howEnded = checkGameEnd(board);
 
-const player2Play = async()=>{
-  stateHTML.innerText = `${names[ptPlayer2]}'s turn:`;
-  player2 === atHuman ? await humanPlay() : await agentPlay();
-
-  let howEnded = checkGameEnd(board);
-  ((howEnded === etContinue) && (!controlEndGame)) ? player1Play() : endGame(howEnded);
+    if (howEnded === etContinue){
+      etControlHowEnded = etContinue;
+      playerNPlay();
+    }else{
+      endGame(howEnded);
+    }
+  }else{
+    endGame(etRestart);
+  }
 }
 
 const humanPlay = async()=>{
-  humanCanPlay = true;
-  while (humanCanPlay) await pause(50);
+  bHumanCanPlay = true;
+  while (bHumanCanPlay) await pause(50);
 }
 
 const agentPlay = async()=>{
   await pause(1000);
-  let i,j;
 
-  let lucky = Math.random();
-  if(lucky < difficulty/100){
-    [i,j] = getBestAction(board);
-  }else{
-    [i,j] = getRandomAction(board);
+  if(etControlHowEnded !== etRestart){
+    let i,j;
+
+    let lucky = Math.random();
+    if(lucky < nDifficulty/100){
+      [i,j] = getBestAction(board);
+    }else{
+      [i,j] = getRandomAction(board);
+    }
+
+    fieldClicked(i,j);
   }
-
-  fieldClicked(i,j);
 }
 
 const getRandomAction = (board)=>{
@@ -253,7 +289,7 @@ const getRandomAction = (board)=>{
 const getBestAction = (board)=>{
   let alpha = Number.NEGATIVE_INFINITY;
   let beta = Number.POSITIVE_INFINITY;
-  const [v,i,j] = max(board,currentPlayer,alpha,beta);
+  const [v,i,j] = max(board,ptCurrentPlayer,alpha,beta);
   return [i,j];
 }
 
