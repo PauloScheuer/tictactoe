@@ -1,30 +1,6 @@
-//constants
-//Game type
-const gtEasy = 0;
-const gtMedium = 1;
-const gtHard = 2;
-const gtImpossible = 3;
-const gtTwoPlayers = 4;
-
-//Player Type
-const ptPlayerNone = -1;
-const ptPlayer1=0;
-const ptPlayer2=1;
-
-//End type
-const etWin1 = ptPlayer1;
-const etWin2 = ptPlayer2;
-const etDraw = 2;
-const etContinue = 3;
-const etRestart = 4;
-
-//Agent type
-const atHuman = 0;
-const atAI = 1;
-
-const boardSize = 3;
-const names = ['Player 1', 'Player 2'];
-const visuals = ['X','O'];
+import { gtEasy, gtMedium, gtHard, gtImpossible, gtTwoPlayers, ptPlayerNone, ptPlayer1,
+  ptPlayer2, etWin1, etWin2, etDraw, etContinue, etRestart, atHuman, atAI, boardSize,
+  names, visuals } from "./consts.js";
 
 // game variables
 const board = Array.from({length:boardSize},_=>Array.from({length:boardSize},_=>-1));
