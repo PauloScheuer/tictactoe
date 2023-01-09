@@ -76,19 +76,19 @@ body{
   align-items: center;
 }
 
-#restart{
+.actionButton{
   border: 3px #0C9CF4 solid;
   padding: 8px;
-  border-radius: 50%;
+  border-radius: 8px;
   font-size: 16px;
   transition: 500ms;
   cursor: pointer;
   margin-right: 16px;
 }
-#restart:hover{
+.actionButton:hover{
   background-color: #0C9CF4;
 }
-#restart:hover > #restartImg{
+.actionButton:hover > svg{
   stroke: white;
 }
 

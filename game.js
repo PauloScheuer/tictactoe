@@ -42,6 +42,7 @@ const configHTML     = document.getElementById('config');
 const resultHTML     = document.getElementById('result');
 const stateHTML      = document.getElementById('state');
 const restartHTML    = document.getElementById('restart');
+const backHTML       = document.getElementById('back');
 const boardHTML      = document.getElementById('board');
 const easyHTML       = document.getElementById('easy');
 const mediumHTML     = document.getElementById('medium');
@@ -54,6 +55,7 @@ window.addEventListener('load',async()=>{
   resultHTML.classList.add('invisible');
 
   restartHTML.onclick     = ()=>handleRestart();
+  backHTML.onclick        = ()=>handleGoBack();
 
   easyHTML.onclick        = ()=>startGame(gtEasy);
   mediumHTML.onclick      = ()=>startGame(gtMedium);
@@ -132,6 +134,17 @@ const handleRestart = ()=>{
 
   resetBody();
   playerNPlay();
+}
+
+const handleGoBack = ()=>{
+  //if the game is currently being played, need to stop the turn recursion
+  if(etControlHowEnded == etContinue){
+    bControlEndGame = true;
+  }
+
+  configHTML.classList.remove('invisible');
+  boardHTML.classList.add('invisible');
+  resultHTML.classList.add('invisible');
 }
 
 const checkGameEnd = (board)=>{
