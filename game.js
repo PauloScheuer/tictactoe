@@ -54,13 +54,13 @@ const startGame = (gtMode)=>{
     atPlayer2 = atAI;
     switch(gtMode){
       case gtEasy:
-        nDifficulty = 20;
+        nDifficulty = 30;
         break;
       case gtMedium:
-        nDifficulty = 40;
+        nDifficulty = 60;
         break;
       case gtHard:
-        nDifficulty = 60;
+        nDifficulty = 90;
         break;
       default:
         nDifficulty = 100;
