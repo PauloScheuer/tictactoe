@@ -105,3 +105,52 @@ body{
   top: 0;
   left: 0;
 }
+
+#players{
+  margin-top: 12px;
+  background-color: white;
+  display: flex;
+  justify-content: space-between;
+  border-radius: 8px;
+}
+
+.player{
+  background-color: white;
+  color: #0C9CF4;
+  font-size: 16px;
+  font-weight: bold;
+  width: 50%;
+  height: 48px;
+  cursor: pointer;
+  transition: 500ms;
+}
+.player:hover{
+  background-color: #0C9CF4;
+  color: white;
+}
+
+#x{
+  border-radius: 8px 0 0 8px;
+}
+
+#o{
+  border-radius: 0 8px 8px 0;
+}
+
+#backVisual{
+  margin-top: 12px;
+  background-color: white;
+  border-radius: 8px;
+  width: 20%;
+  height: 36px;
+  stroke: #0C9CF4;
+  cursor: pointer;
+  transition: 500ms;
+}
+
+#backVisual:hover{
+  background-color: #0C9CF4;
+}
+#backVisual:hover > svg{
+  stroke: white;
+}

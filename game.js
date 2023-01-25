@@ -1,6 +1,6 @@
 import { gtEasy, gtMedium, gtHard, gtImpossible, gtTwoPlayers, ptPlayerNone, ptPlayer1,
   ptPlayer2, etWin1, etWin2, etContinue, etRestart, atHuman, atAI, boardSize,
-  names, visuals, ltNone, ltFirstX, ltFirstY, ltSecondX, ltThirdX, ltSecondY, ltThirdY, ltFirstZ, ltSecondZ, etDraw } from "./consts.js";
+  names, visuals, ltNone, ltFirstX, ltFirstY, ltSecondX, ltThirdX, ltSecondY, ltThirdY,  ltSecondZ, etDraw } from "./consts.js";
 
 import {getRandomAction, getBestAction} from './agent.js';
 import {checkGameEnd} from './utils.js';
@@ -11,8 +11,7 @@ let ptCurrentPlayer = ptPlayer1;
 let bHumanCanPlay = true;
 let bControlEndGame = false;
 let etControlHowEnded = etContinue;
-let atPlayer1 = atHuman;
-let atPlayer2 = atAI;
+let atPlayers = [atHuman,atAI];
 let nDifficulty = 0;
 let acController = null;
 
@@ -22,6 +21,10 @@ const resultHTML     = document.getElementById('result');
 const stateHTML      = document.getElementById('state');
 const restartHTML    = document.getElementById('restart');
 const backHTML       = document.getElementById('back');
+const visualHTML     = document.getElementById('visual');
+const backVisualHTML = document.getElementById('backVisual');
+const xHTML          = document.getElementById('x');
+const oHTML          = document.getElementById('o');
 const boardHTML      = document.getElementById('board');
 const easyHTML       = document.getElementById('easy');
 const mediumHTML     = document.getElementById('medium');
@@ -32,27 +35,47 @@ const twoPlayersHTML = document.getElementById('twoplayers');
 window.addEventListener('load',async()=>{
   boardHTML.classList.add('invisible');
   resultHTML.classList.add('invisible');
+  visualHTML.classList.add('invisible');
 
   restartHTML.onclick     = ()=>handleRestart();
   backHTML.onclick        = ()=>handleGoBack();
+  backVisualHTML.onclick  = ()=>handleGoBackVisual();
 
-  easyHTML.onclick        = ()=>startGame(gtEasy);
-  mediumHTML.onclick      = ()=>startGame(gtMedium);
-  hardHTML.onclick        = ()=>startGame(gtHard);
-  impossibleHTML.onclick  = ()=>startGame(gtImpossible);
+  easyHTML.onclick        = ()=>selectVisual(gtEasy);
+  mediumHTML.onclick      = ()=>selectVisual(gtMedium);
+  hardHTML.onclick        = ()=>selectVisual(gtHard);
+  impossibleHTML.onclick  = ()=>selectVisual(gtImpossible);
   twoPlayersHTML.onclick  = ()=>startGame(gtTwoPlayers);
 });
+
+const selectVisual = (gtMode)=>{
+  visualHTML.classList.remove('invisible');
+  configHTML.classList.add('invisible');
+
+  xHTML.onclick = ()=>handleSelect('X',gtMode);
+  oHTML.onclick = ()=>handleSelect('O',gtMode);
+}
+
+const handleSelect = (option,gtMode)=>{
+  if(visuals[0] === option){
+    atPlayers = [atHuman,atAI];
+    bHumanCanPlay = true;
+  }else{
+    atPlayers = [atAI,atHuman];
+    bHumanCanPlay = false;
+  }
+
+  startGame(gtMode);
+}
 
 const startGame = (gtMode)=>{
   ptCurrentPlayer = ptPlayer1;
   etControlHowEnded = etContinue;
 
-  atPlayer1 = atHuman;
   if(gtMode === gtTwoPlayers){
-    atPlayer2 = atHuman;
+    atPlayers = [atHuman,atHuman];
     nDifficulty = 0;
   }else{
-    atPlayer2 = atAI;
     switch(gtMode){
       case gtEasy:
         nDifficulty = 30;
@@ -182,6 +205,7 @@ const fieldClicked = (i,j)=>{
 
 const resetBody = ()=>{
   configHTML.classList.add('invisible');
+  visualHTML.classList.add('invisible');
   boardHTML.classList.remove('invisible');
   resultHTML.classList.remove('invisible');
 
@@ -220,6 +244,11 @@ const handleGoBack = ()=>{
   configHTML.classList.remove('invisible');
   boardHTML.classList.add('invisible');
   resultHTML.classList.add('invisible');
+}
+
+const handleGoBackVisual = ()=>{
+  visualHTML.classList.add('invisible');
+  configHTML.classList.remove('invisible');
 }
 
 const pause = async(time)=>{
@@ -263,7 +292,7 @@ const handleFieldClicked = (i,j)=>{
 const playerNPlay = async()=>{
   stateHTML.innerText = `${names[ptCurrentPlayer]}'s turn:`;
   if(!bControlEndGame){
-    let atPlayer = ptCurrentPlayer === ptPlayer1 ? atPlayer1 : atPlayer2;
+    let atPlayer = ptCurrentPlayer === ptPlayer1 ? atPlayers[0] : atPlayers[1];
 
     atPlayer === atHuman ? await humanPlay() : await agentPlay();
 
