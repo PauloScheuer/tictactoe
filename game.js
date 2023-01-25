@@ -234,11 +234,14 @@ const pause = async(time)=>{
 
       tTimer = setTimeout(()=>{
         resolve();
-        acController.signal.removeEventListener('abort',handleAbort);
+        if (acController !== null){
+          acController.signal.removeEventListener('abort',handleAbort);
+        }
       }, time);
 
-      acController.signal.addEventListener('abort',handleAbort);
-
+      if (acController !== null){
+        acController.signal.addEventListener('abort',handleAbort);
+      }
     });
   } catch (error) {
     //do nothing

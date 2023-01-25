@@ -1,6 +1,6 @@
 //file with the implementation of the AI agent with minmax algorithm
 
-import { boardSize, etContinue, etDraw, ptPlayerNone, ptPlayer1 } from "./consts.js";
+import { boardSize, etContinue, etDraw, ptPlayerNone, ptPlayer1, ptPlayer2 } from "./consts.js";
 import { checkGameEnd } from "./utils.js";
 
 export const getRandomAction = (board)=>{
