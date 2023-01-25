@@ -45,6 +45,7 @@ window.addEventListener('load',async()=>{
 
 const startGame = (gtMode)=>{
   ptCurrentPlayer = ptPlayer1;
+  etControlHowEnded = etContinue;
 
   atPlayer1 = atHuman;
   if(gtMode === gtTwoPlayers){
