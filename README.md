@@ -7,6 +7,7 @@ Tic Tac Toe game with an AI oponent, implemented with the minmax algorithm.
 - Hard
 - Impossible
 - 2 players
+
  The harder the mode, higher is the chance of the AI doing the best possible action.
  
  ## functionalities
