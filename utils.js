@@ -1,6 +1,7 @@
 // file with util functions
 
-import { boardSize, etContinue, etDraw, ptPlayerNone } from "./consts.js";
+import { boardSize, etContinue, etDraw, ltFirstX, ltFirstY, ltFirstZ, ltNone, ltSecondX,
+  ltSecondY, ltSecondZ, ltThirdX, ltThirdY, ptPlayerNone } from "./consts.js";
 
 export const checkGameEnd = (board)=>{
     let fieldX = ptPlayerNone;
@@ -10,6 +11,11 @@ export const checkGameEnd = (board)=>{
   
     let nFilledFields = 0;
   
+    let nIndex = -1;
+
+    const positionsX = [ltFirstX, ltSecondX, ltThirdX];
+    const positionsY = [ltFirstY, ltSecondY, ltThirdY];
+
     for (let i = 0;i<boardSize;i++){
       if (board[i][0] !== ptPlayerNone) nFilledFields++;
   
@@ -24,7 +30,10 @@ export const checkGameEnd = (board)=>{
         if (fieldY !== board[j][i]) fieldY = ptPlayerNone;
       }
   
-      if((fieldX !== ptPlayerNone) || (fieldY !== ptPlayerNone)) break;
+      if((fieldX !== ptPlayerNone) || (fieldY !== ptPlayerNone)){
+        nIndex = i;
+        break;
+      }
   
       if(i > 0){
         if (fieldZ1 !== board[i][i]) fieldZ1 = ptPlayerNone;
@@ -32,11 +41,11 @@ export const checkGameEnd = (board)=>{
       }
     }
   
-    if(fieldX !== ptPlayerNone) return fieldX;
-    if(fieldY !== ptPlayerNone) return fieldY;
-    if(fieldZ1 !== ptPlayerNone) return fieldZ1;
-    if(fieldZ2 !== ptPlayerNone) return fieldZ2;
-    if(nFilledFields === boardSize*boardSize) return etDraw;
+    if(fieldX !== ptPlayerNone) return [fieldX, positionsX[nIndex]];
+    if(fieldY !== ptPlayerNone) return [fieldY, positionsY[nIndex]];
+    if(fieldZ1 !== ptPlayerNone) return [fieldZ1, ltFirstZ];
+    if(fieldZ2 !== ptPlayerNone) return [fieldZ2, ltSecondZ];
+    if(nFilledFields === boardSize*boardSize) return [etDraw, ltNone];
     
-    return etContinue;
+    return [etContinue, ltNone];
 }

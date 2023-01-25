@@ -23,7 +23,7 @@ export const getBestAction = (board, ptCurrentPlayer)=>{
 }
 
 const max = (board_current,player,alpha,beta)=>{
-  let howEnded = checkGameEnd(board_current);
+  let howEnded = checkGameEnd(board_current)[0];
     
   if (howEnded === player){
     return [1,-1,-1];
@@ -54,7 +54,7 @@ const max = (board_current,player,alpha,beta)=>{
 }
   
 const min = (board_current,player,alpha,beta)=>{
-  let howEnded = checkGameEnd(board_current);
+  let howEnded = checkGameEnd(board_current)[0];
   
   if (howEnded === oponent(player)){
     return [-1,-1,-1];

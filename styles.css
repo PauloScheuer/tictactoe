@@ -12,6 +12,7 @@ body{
   display: grid;
   grid-template-columns: auto auto auto;
   gap: 16px;
+  position: relative;
 }
 
 .field{
@@ -94,4 +95,12 @@ body{
 
 #state{
   color: #0C9CF4;
+}
+
+#canvas{
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
 }
