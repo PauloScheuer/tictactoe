@@ -1,9 +1,10 @@
 import { gtEasy, gtMedium, gtHard, gtImpossible, gtTwoPlayers, ptPlayerNone, ptPlayer1,
   ptPlayer2, etWin1, etWin2, etContinue, etRestart, atHuman, atAI, boardSize,
-  names, visuals, ltNone, ltFirstX, ltFirstY, ltSecondX, ltThirdX, ltSecondY, ltThirdY,  ltSecondZ, etDraw } from "./consts.js";
+  names, visuals, ltNone, etDraw } from "./consts.js";
 
 import {getRandomAction, getBestAction} from './agent.js';
 import {checkGameEnd} from './utils.js';
+import { drawEndGame } from "./canvas.js";
 
 // game variables
 const board = Array.from({length:boardSize},_=>Array.from({length:boardSize},_=>-1));
@@ -111,83 +112,11 @@ const endGame = (howEnded, positionEnd = ltNone)=>{
         stateHTML.innerText = `${names[ptPlayer2]} won!`;
       }
 
-      drawEndGame(positionEnd);
+      drawEndGame(positionEnd,boardHTML);
     }
   }
   etControlHowEnded = howEnded;
   bControlEndGame = false;
-}
-
-const drawEndGame = (positionEnd)=>{
-  if (positionEnd === ltNone){
-    return;
-  }
-
-  const canvas = document.createElement('canvas');
-  canvas.id = 'canvas';
-
-  boardHTML.appendChild(canvas);
-
-  const rect = canvas.getBoundingClientRect();
-
-  canvas.setAttribute('width', rect.width);
-  canvas.setAttribute('height', rect.height);
-
-  const context = canvas.getContext('2d');
-  context.strokeStyle = 'red';
-  context.lineWidth = 5;
-  context.lineCap = 'round';
-
-  const [startX, startY, sizeStepX, sizeStepY] = getLinePosAndSize(positionEnd,rect);
-
-  let step = 0;
-  const interval = setInterval(()=>{
-    context.beginPath();
-    context.moveTo(startX+step*sizeStepX,startY+step*sizeStepY);
-    step++;
-    context.lineTo(startX+step*sizeStepX,startY+step*sizeStepY);
-    context.stroke();
-
-    if (step > 99){
-      clearInterval(interval);
-    }
-  },10);
-}
-
-const getLinePosAndSize = (positionEnd,rect)=>{
-  const fieldSize = document.getElementsByClassName('field')[0].clientWidth;
-  const fieldGap = (boardHTML.clientWidth - boardSize*fieldSize)/(boardSize-1);
-
-  let startX = 10;
-  let startY = 10;
-  let sizeStepX = (rect.width-2*startX)/100;
-  let sizeStepY = (rect.width-2*startY)/100;
-
-  if ([ltFirstX,ltSecondX,ltThirdX].includes(positionEnd)){
-    startY = fieldSize / 2;
-    if (positionEnd === ltSecondX){
-      startY += fieldSize + fieldGap;
-    }else if(positionEnd === ltThirdX){
-      startY += (fieldSize + fieldGap)*2;
-    }
-
-    sizeStepY = 0;
-  }else if ([ltFirstY, ltSecondY, ltThirdY].includes(positionEnd)){
-    startX = fieldSize / 2;
-    if (positionEnd === ltSecondY){
-      startX += fieldSize + fieldGap;
-    }else if(positionEnd === ltThirdY){
-      startX += (fieldSize + fieldGap)*2;
-    }
-
-    sizeStepX = 0;
-  }else if(positionEnd === ltSecondZ){
-    startY = fieldSize*3 + fieldGap*2 - 10;
-
-    sizeStepY = (rect.width-2*startY)/100;
-  }
-
-  return [startX,startY,sizeStepX,sizeStepY];
 }
 
 const fieldClicked = (i,j)=>{
