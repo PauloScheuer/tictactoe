@@ -1,5 +1,5 @@
 import { gtEasy, gtMedium, gtHard, gtImpossible, gtTwoPlayers, ptPlayerNone, ptPlayer1,
-  ptPlayer2, etWin1, etWin2, etContinue, etRestart, atHuman, atAI, boardSize,
+  ptPlayer2, etWin1, etWin2, etContinue, atHuman, atAI, boardSize,
   names, visuals, ltNone, etDraw } from "./consts.js";
 
 import {getRandomAction, getBestAction} from './agent.js';
@@ -10,11 +10,11 @@ import { drawEndGame } from "./canvas.js";
 const board = Array.from({length:boardSize},_=>Array.from({length:boardSize},_=>-1));
 let ptCurrentPlayer = ptPlayer1;
 let bHumanCanPlay = true;
-let bControlEndGame = false;
-let etControlHowEnded = etContinue;
 let atPlayers = [atHuman,atAI];
 let nDifficulty = 0;
 let acController = null;
+let curID = 0;
+let bStartGame = false;
 
 // html elements
 const configHTML     = document.getElementById('config');
@@ -47,6 +47,8 @@ window.addEventListener('load',async()=>{
   hardHTML.onclick        = ()=>selectVisual(gtHard);
   impossibleHTML.onclick  = ()=>selectVisual(gtImpossible);
   twoPlayersHTML.onclick  = ()=>startGame(gtTwoPlayers);
+
+  gameLoop();
 });
 
 const selectVisual = (gtMode)=>{
@@ -71,7 +73,6 @@ const handleSelect = (option,gtMode)=>{
 
 const startGame = (gtMode)=>{
   ptCurrentPlayer = ptPlayer1;
-  etControlHowEnded = etContinue;
 
   if(gtMode === gtTwoPlayers){
     atPlayers = [atHuman,atHuman];
@@ -93,30 +94,23 @@ const startGame = (gtMode)=>{
   }
 
   resetBody();
-  playerNPlay();
+  bStartGame = true
 }
 
 const endGame = (howEnded, positionEnd = ltNone)=>{
   bHumanCanPlay = false;
-  if(acController != null){
-    acController.abort();
-  }
 
-  if(!bControlEndGame){
-    if(howEnded === etDraw){
-      stateHTML.innerText = "It's a draw!";
-    }else{
-      if (howEnded === etWin1){
-        stateHTML.innerText = `${names[ptPlayer1]} won!`;
-      } else if(howEnded === etWin2){
-        stateHTML.innerText = `${names[ptPlayer2]} won!`;
-      }
-
-      drawEndGame(positionEnd,boardHTML);
+  if(howEnded === etDraw){
+    stateHTML.innerText = "It's a draw!";
+  }else{
+    if (howEnded === etWin1){
+      stateHTML.innerText = `${names[ptPlayer1]} won!`;
+    } else if(howEnded === etWin2){
+      stateHTML.innerText = `${names[ptPlayer2]} won!`;
     }
+
+    drawEndGame(positionEnd,boardHTML);
   }
-  etControlHowEnded = howEnded;
-  bControlEndGame = false;
 }
 
 const fieldClicked = (i,j)=>{
@@ -153,21 +147,17 @@ const resetBody = ()=>{
 }
 
 const handleRestart = ()=>{
-  ptCurrentPlayer = ptPlayer1;
-
-  //if the game is currently being played, need to stop the turn recursion
-  if(etControlHowEnded == etContinue){
-    bControlEndGame = true;
+  if(acController !== null){
+    acController.abort()
   }
 
   resetBody();
-  playerNPlay();
+  bStartGame = true;
 }
 
 const handleGoBack = ()=>{
-  //if the game is currently being played, need to stop the turn recursion
-  if(etControlHowEnded == etContinue){
-    bControlEndGame = true;
+  if(acController !== null){
+    acController.abort()
   }
 
   configHTML.classList.remove('invisible');
@@ -180,8 +170,12 @@ const handleGoBackVisual = ()=>{
   configHTML.classList.remove('invisible');
 }
 
-const pause = async(time)=>{
-  acController = new AbortController();
+const pause = async(time, useAbort = true)=>{
+  if(!useAbort){
+    await new Promise(resolve=>setTimeout(()=>resolve(),time));
+    return;
+  }
+
   try {
     await new Promise((resolve, reject) => {
       let tTimer;
@@ -205,7 +199,6 @@ const pause = async(time)=>{
   } catch (error) {
     //do nothing
   }
-  acController = null;
 }
 
 const setPlayer = ()=>{
@@ -218,35 +211,63 @@ const handleFieldClicked = (i,j)=>{
   }
 }
 
-const playerNPlay = async()=>{
-  stateHTML.innerText = `${names[ptCurrentPlayer]}'s turn:`;
-  if(!bControlEndGame){
-    let atPlayer = ptCurrentPlayer === ptPlayer1 ? atPlayers[0] : atPlayers[1];
-
-    atPlayer === atHuman ? await humanPlay() : await agentPlay();
-
-    const [howEnded, positionEnd] = checkGameEnd(board);
-
-    if (howEnded === etContinue){
-      etControlHowEnded = etContinue;
-      playerNPlay();
-    }else{
-      endGame(howEnded, positionEnd);
+const gameLoop = async ()=>{
+  while(true){
+    if(bStartGame){
+      bStartGame = false;
+      ptCurrentPlayer = ptPlayer1;
+      await game(curID);
+      curID++;
     }
-  }else{
-    endGame(etRestart);
+    await pause(50, false);
   }
 }
 
-const humanPlay = async()=>{
+const game = async(id)=>{
+  for(let i = 0;i<9;i++){
+    try {
+      acController = new AbortController();
+      await new Promise(async(resolve,reject)=>{
+
+        acController.signal.addEventListener('abort',()=>{
+          reject();
+        })
+
+        stateHTML.innerText = `${names[ptCurrentPlayer]}'s turn:`;
+
+        atPlayers[ptCurrentPlayer] === atHuman ? await humanPlay(id) : await agentPlay(id);
+
+        resolve();
+      });
+    } catch (error) {
+      acController = null;
+      break;
+    } finally{
+      acController = null;
+      const [howEnded, positionEnd] = checkGameEnd(board);
+
+      if (howEnded !== etContinue){
+        endGame(howEnded, positionEnd);
+        break;
+      }
+    }
+  }
+}
+
+const humanPlay = async(id)=>{
+  if(id !== curID){
+    return;
+  }
+
   bHumanCanPlay = true;
   while (bHumanCanPlay) await pause(50);
 }
 
-const agentPlay = async()=>{
+const agentPlay = async(id)=>{
+  bHumanCanPlay = false;
   await pause(1000);
 
-  if(etControlHowEnded !== etRestart){
+  if(id === curID){
     let i,j;
 
     let lucky = Math.random();

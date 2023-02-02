@@ -17,7 +17,6 @@ export const etWin1     = ptPlayer1;
 export const etWin2     = ptPlayer2;
 export const etDraw     = 2;
 export const etContinue = 3;
-export const etRestart  = 4;
 
 //Agent type
 export const atHuman = 0;
